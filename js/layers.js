@@ -18,10 +18,14 @@ addLayer("v", {
     softcapPower:ExpantaNum(0.4),                                 // Also the amount required to unlock the layer.
 
     type: "normal",                         // Determines the formula used for calculating prestige currency.
-    exponent: ExpantaNum(0.5),                          // "normal" prestige gain is (currency^exponent).
+    exponent: 0.5,                          // "normal" prestige gain is (currency^exponent).
 
-    gainMult() {                            // Returns your multiplier to your gain of the prestige resource.
-        return new ExpantaNum(upgradeEffect('v',24)).mul(layers.v.buyables[13].effect2())               // Factor in any bonuses multiplying gain here.
+    gainMult() {                  
+        var v= new ExpantaNum(1).mul(layers.v.buyables[13].effect2())        // Returns your multiplier to your gain of the prestige resource.
+        if(hasUpgrade('v',24)){ v=v.mul(upgradeEffect('v',24)) }       
+        if(hasChallenge('v',11)){v=v.mul(challengeEffect('v',11))}
+        return v
+        // Factor in any bonuses multiplying gain here.
     },
     gainExp() {                             // Returns the exponent to your gain of the prestige resource.
         if(player.v.points.gte(this.softcap)) return OmegaNum(2.5).pow(OmegaNum(1).sub(buyableEffect("v",13)))
@@ -94,7 +98,7 @@ addLayer("v", {
             description: "升级23:根据虚空增强升级21",
             cost: new ExpantaNum(10000),
             effect() {
-                return player.v.points.add(10).pow(0.1)
+                return player.v.points.add(10).pow(0.15)
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
             unlocked(){return hasUpgrade('v',22)},
@@ -103,7 +107,9 @@ addLayer("v", {
             description: "升级24:根据虚空总数改进获取虚空公式倍数",
             cost: new ExpantaNum(50000),
             effect() {
-                return player.v.points.add(10).pow(0.2)
+
+                if(hasUpgrade('v',33)){ return player.v.points.add(10).pow(0.2).mul(upgradeEffect('v',33))}else{return player.v.points.add(10).pow(0.2)}
+               
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
             unlocked(){return hasUpgrade('v',23)},
@@ -138,15 +144,27 @@ addLayer("v", {
                 return player.v.points.add(1).log10().add(1).pow(0.1)
             },
             effectDisplay() { return "变为"+format(upgradeEffect(this.layer, this.id))+"次根" }, // Add formatting to the effect
-        },41: {
+        },
+        33: {
+            name:"1",
+            description: "升级33：根据神谕增强升级24",
+            cost: new ExpantaNum(5e149),
+            effect() {
+                return player.points.add(1000).logBase(1.1)
+            },
+            unlocked(){return hasUpgrade('v',32)},
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
+        },
+        41: {
             name:"1",
             description: "升级41：重载——————开启一个虚空挑战,同时解开第三个可重复购买项的上限，上限外只能加成虚空获取。上限外对虚空的加成加强。",
-            cost: new ExpantaNum(1e131),
+            cost: new ExpantaNum(1e130),
             unlocked(){return hasUpgrade('v',32)},
             //effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
         },
 },
-//automate(){layers.v.buyables[13].buy()},
+
+
 buyables: {
     11: {
         cost(x){ 
@@ -207,6 +225,7 @@ buyables: {
             if(hasUpgrade("v",41)&&getBuyableAmount(this.layer, this.id).gte(16)) baseEffect = baseEffect.pow(getBuyableAmount(this.layer, this.id).sub(9).log10().add(1).pow(getBuyableAmount(this.layer, this.id).sub(13.75).log10().pow(1.5)))
             return baseEffect
         },
+         
         buy() {
             doReset(this.layer)
             player[this.layer].points = player[this.layer].points.sub(this.cost(getBuyableAmount(this.layer, this.id)))
@@ -214,8 +233,18 @@ buyables: {
         },
         purchaseLimit(){return hasUpgrade("v",41) ? 25 : 8},
     },
-},              
+},   
+update(diff){
+    if(hasUpgrade("v",27)) if(player.v.points.gte(layers.v.buyables[13].cost(getBuyableAmount("v",13)))) if(getBuyableAmount(this.layer, 13).lte(7)){
+        layers.v.buyables[13].buy()
+    }
+    else if(hasUpgrade("v",41)&&getBuyableAmount(this.layer, 13).lte(24)){
+        layers.v.buyables[13].buy()
+    }
+} ,   
+
         // Look in the upgrades docs to see what goes here!
+        
         milestones: {
             1: {
                 requirementDescription: "1e80虚空",
@@ -226,14 +255,19 @@ buyables: {
             
             
         },
+       
     challenges: {
         11: {
             name: "重塑虚空架构",
             challengeDescription: "虚空的结构太混乱，我们需要重塑一下，但会大幅度降低神谕点数产生",
-            canComplete(){return player.points.gte(1e38)},
-            goalDescription(){return "1e38创世神谕"},
-            rewardDisplay(){return '开启两个新层    '},
-            unlocked(){return hasUpgrade('v',41)}
+            canComplete(){return player.points.gte(2e27)},
+            goalDescription(){return "2e27创世神谕"},
+            rewardDisplay(){return `将虚空获得量乘以神谕的对数的平方，目前*${format(challengeEffect('v',11))}`},
+            rewardEffect() {
+                return player.points.add(10).logBase(10).pow(2)
+            },
+            unlocked(){return hasUpgrade('v',41)},
+            
         },
     },
      infoboxes: {
@@ -317,7 +351,7 @@ addLayer("s", {
     
     
     gainMult() {                            // Returns your multiplier to your gain of the prestige resource.
-        return new ExpantaNum(1000).pow(2)               // Factor in any bonuses multiplying gain here.
+        return new ExpantaNum(5e163).mul(player.s.points.add(1)).pow(1.01)               // Factor in any bonuses multiplying gain here.
     },
     gainExp() {                             // Returns your exponent to your gain of the prestige resource.
         return new ExpantaNum(1)
@@ -358,6 +392,8 @@ addLayer("s", {
     },
     tabFormat: {"空间管理界面":{
         content:["main-display",
+        ['display-text',function(){return `你的空间元素给与创世神谕获取倍数*${format(player.s.points.add(1).pow(3))}`}],
+        'blank',
         "prestige-button",
         'blank',
         ['display-text',function(){return "里程碑"}],
