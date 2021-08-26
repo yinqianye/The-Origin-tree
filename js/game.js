@@ -401,7 +401,8 @@ function gameLoop(diff) {
 function hardReset() {
 	if (!confirm("Are you sure you want to do this? You will lose all your progress!")) return
 	player = null
-	save();
+	localStorage.removeItem(modInfo.id);
+	localStorage.removeItem(modInfo.id+"_options");
 	window.location.reload();
 }
 

@@ -1,7 +1,7 @@
 let modInfo = {
-	name: "起源",
+	name: "起源之扩张",
 	id: "起源",
-	author: "",
+	author: "yinqianye",
 	pointsName: "创世神谕",
 	discordName: "",
 	discordLink: "",
@@ -12,16 +12,16 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.0",
+	num: "0.1.1",
 	name: "",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
-<h3>v0.002</h3><br>
-- 增加时间与空间层.<br>
-- 数字大约为???.<br>		
+<h3>v0.1.1</h3><br>
+- 增加空间层，和第1维度.<br>
+- 数字大约为1e1740.<br>		
 
-<h3>v0.001</h3><br>
+<h3>v0.1.0</h3><br>
 		- 完成基础虚空层.<br>
 		- 数字大约为1e300.`
 
@@ -57,13 +57,20 @@ if (hasUpgrade('v', 24)) gain = gain.times(upgradeEffect('v', 24))
 //if (hasUpgrade('v', 32)) gain = gain.times(upgradeEffect('v', 32))
 //if (hasUpgrade('v', 33)) gain = gain.times(upgradeEffect('v', 33))
 //if (hasUpgrade('v', 41)) gain = gain.times(upgradeEffect('v', 41))
+if (hasUpgrade('v', 51)) gain = gain.times(upgradeEffect('v', 51))
+if (hasUpgrade('v', 51)) gain = gain.times(OmegaNum(2))
 if (getBuyableAmount('v',11)) gain = gain.times(buyableEffect('v', 11))
 if (getBuyableAmount('v',12)) gain = gain.times(buyableEffect('v', 12))
 if (getBuyableAmount('v',13)) gain = gain.pow(buyableEffect("v",13))
 gain = gain.times(OmegaNum(2).pow(tvu))
 
 //下面是层级buff
-gain = gain.mul(player.s.points.add(1).pow(3))
+if(hasUpgrade('s',21)){
+	gain = gain.mul(player.s.points.add(1).pow(3).pow(3))
+}else{
+	gain = gain.mul(player.s.points.add(1).pow(3))
+}
+
 //下面是挑战专用
 //虚空挑战11debuff
 if(inChallenge("v",11)) gain = gain.pow(0.1)

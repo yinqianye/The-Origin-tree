@@ -9,6 +9,8 @@
 
 	<link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
 
+	
+	<script src="js/utils/undefined.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
 	<script src="js/technical/break_eternity.js"></script>
 	<script src="js/technical/layerSupport.js"></script>
@@ -29,7 +31,6 @@
 	<script src="js/utils/options.js"></script>
 	<script src="js/utils/save.js"></script>
 	<script src="js/utils/themes.js"></script>
-
 </head>
 
 
@@ -38,7 +39,7 @@
 		<canvas id="treeCanvas" class="canvas" v-if="!(gameEnded && !player.keepGoing)"></canvas>
 
 		<div v-if="false" id="loadingSection" class="fullWidth">
-			<h1>Loading... (If this takes too long it means there was a serious error!)←</h1>
+			<h1>Loading... (If this takes too long it means there was a serious error!)如果你点了硬重置,请点play again.←</h1>
 		</div>
 		<div class="vl" v-if="player.navTab !== 'none' && tmp.other.splitScreen && player.tab!='none' && !(gameEnded && !player.keepGoing)"></div>
 		<div v-if="(gameEnded && !player.keepGoing)" class="fullWidth">
@@ -85,6 +86,7 @@
 					<li><a class="link" href="http://discord.gg/wwQfgPa" target="_blank"
 							v-bind:style="{'font-size': '16px'}">Main Prestige Tree server</a></li>
 				</ul>
+
 			</div>
 			<overlay-head v-if="!(gameEnded && !player.keepGoing)"></overlay-head>
 			<div class="sideLayers">

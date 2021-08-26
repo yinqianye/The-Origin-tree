@@ -36,8 +36,8 @@ addLayer("v", {
     
     autoUpgrade(){return hasMilestone("v",10)},
    
-    passiveGeneration(){return hasMilestone("v",1)? 0.1:0},
-    
+
+    passiveGeneration(){return hasMilestone("s",1)? 1:0},
     upgrades: {
             11: {
                 name:"1",
@@ -79,8 +79,10 @@ addLayer("v", {
             name:"1",
             description: "升级21:根据创世神谕增强神谕产生",
             cost: new ExpantaNum(256),
-            effect() {
-                return player.points.add(10).mul(upgradeEffect('v',23)).pow(0.3)
+            effect() {if(hasUpgrade('v',52)){
+            
+                return player.points.add(10).mul(upgradeEffect('v',23)).pow(0.3).mul(upgradeEffect('v',51).root(10))
+            }else{return player.points.add(10).mul(upgradeEffect('v',23)).pow(0.3)}
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
             unlocked(){return hasUpgrade('v',17)},
@@ -161,6 +163,28 @@ addLayer("v", {
             cost: new ExpantaNum(1e130),
             unlocked(){return hasUpgrade('v',32)},
             //effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
+        },
+        51: {
+            name:"1",
+            description: "恭喜创造空间，点数获取获得一个基于空间元素*100的对数的指数增幅",
+            cost: new ExpantaNum(1e167),
+            unlocked(){return hasUpgrade('s',11)},
+            effect() {
+                return player.points.add(1).pow(player.s.points.add(1).mul(10).root(10))
+            },
+            effectDisplay() { return "+"+format(player.s.points.add(1).mul(2).log10()) }, // Add formatting to the effect
+            
+        
+        },
+        52: {
+            name:"1",
+            description: "升级52：虚空提升，升级51的buff给与升级21一个微小的buff",
+            cost() {return new ExpantaNum('3e578')},
+            unlocked(){return hasUpgrade('v',51)},
+            
+            effectDisplay() { return format(upgradeEffect('v',51).root(10)) +"*"}, // Add formatting to the effect
+            
+        
         },
 },
 
@@ -245,31 +269,32 @@ update(diff){
 
         // Look in the upgrades docs to see what goes here!
         
-        milestones: {
+        /*milestones: {
             1: {
                 requirementDescription: "1e80虚空",
                 effectDescription: "每秒获得10%虚空",
                 done() { return player.v.points.gte(1e80) },
-                unlocked(){hasUpgrade('v',32)},
+                
             },
             
             
-        },
+        },*/
        
     challenges: {
         11: {
             name: "重塑虚空架构",
-            challengeDescription: "虚空的结构太混乱，我们需要重塑一下，但会大幅度降低神谕点数产生",
+            challengeDescription: "虚空的结构太混乱，我们需要重塑一下，但会大幅度降低神谕点数产生(注：完成瞬间挑战消失)",
             canComplete(){return player.points.gte(2e27)},
             goalDescription(){return "2e27创世神谕"},
             rewardDisplay(){return `将虚空获得量乘以神谕的对数的平方，目前*${format(challengeEffect('v',11))}`},
             rewardEffect() {
                 return player.points.add(10).logBase(10).pow(2)
             },
-            unlocked(){return hasUpgrade('v',41)},
+            unlocked(){return hasUpgrade('v',41)&&!hasChallenge('v',11)},
             
         },
     },
+    
      infoboxes: {
         lore: {
             title: "虚空————一切的开始",
@@ -277,8 +302,33 @@ update(diff){
             
         },
         
+    },
+    tabFormat: {"虚空核心架构所在":{
+        content:[
+            ['infobox','lore'],
+            "main-display",
+            ['display-text',function(){return `您每秒获得${format(getResetGain(this. layer))}虚空体积(需要空间层的第一个里程碑)`}],
+        'blank',
+        ["prestige-button", "", function (){ return hasMilestone('s',1) ? {'display': 'none'} : {}}],
+        'blank',
+        "buyables",
+        'blank',
+        ['display-text',function(){return "里程碑"}],
+        'blank',
+        'milestones',
+        ['bar','bigBar'],
+        "upgrades",
+        "challenges",
+     
+
+        
+        
+        
+    ]
+}
     }
 }
+
 )
 addLayer("t", {
     startData() { return {                  // startData is a function that returns default data for a layer. 
@@ -288,15 +338,15 @@ addLayer("t", {
 
     color: "#00FF00",                       // The color for this layer, which affects many elements.
     resource: "时间节点",            // The name of this layer's main prestige resource.
-    row: 1,                                 // The row this layer is on (0 is the first row).
-    branches:['v'],
+    row: 'side',                                 // The row this layer is on (0 is the first row).
+  
     baseResource: "虚空",                 // The name of the resource your prestige gain is based on.
     baseAmount() { return player.v.points },  // A function to return the current amount of baseResource.
 
     requires: new ExpantaNum(10),              // The amount of the base needed to  gain 1 of the prestige currency.
                                             // Also the amount required to unlock the layer.
 
-    type: "static",                         // Determines the formula used for calculating prestige currency.
+    type: "none",                         // Determines the formula used for calculating prestige currency.
     exponent: 0.5,                          // "normal" prestige gain is (currency^exponent).
     
     gainMult() {                            // Returns your multiplier to your gain of the prestige resource.
@@ -326,12 +376,50 @@ addLayer("t", {
             
         },
         
-    }
+    },
+    tabFormat: {"时间源头":{
+        content:["main-display",
+        
+        /*['display-text',function(){return `你的空间元素给与创世神谕获取倍数*${format(player.s.points.add(1).pow(3))}`}],
+        'blank',
+        "prestige-button",
+        'blank',*/
+        ['display-text',function(){return "里程碑"}],
+        'blank',
+        'milestones',
+        ['bar','bigBar'],
+        "upgrades"
+        
+        
+    ]
+    },
+                 "超越时间":{
+                     unlocked(){return false},
+                    
+                    
+                    
+                    },},
     })
-addLayer("s", {
+
+
+
+
+
+
+
+
+    
+
+
+    addLayer("s", {
     startData() { return {                  // startData is a function that returns default data for a layer. 
         unlocked: true,                     // You can add more variables here to add them to your layer.
         points: new ExpantaNum(0),             // "points" is the internal name for the main resource of the layer.
+        dim0:new ExpantaNum(0),
+        dim1:new ExpantaNum(0), 
+        dim2:new ExpantaNum(0), 
+        dim3:new ExpantaNum(0),     //dimension
+
     }},
     effect(){return player.s.points.add(1).pow(2)},
     effectDisplay() { return format(Effect(this.layer, this.id))+"x" }, // Add formatting to the effect
@@ -342,23 +430,37 @@ addLayer("s", {
 
     baseResource: "虚空",                 // The name of the resource your prestige gain is based on.
     baseAmount() { return player.v.points },  // A function to return the current amount of baseResource.
-
-    requires: new ExpantaNum(1),              // The amount of the base needed to  gain 1 of the prestige currency.
+    canBuyMax(){return hasMilestone('s',2)},
+    requires(){return new ExpantaNum(1)},              // The amount of the base needed to  gain 1 of the prestige currency.
                                             // Also the amount required to unlock the layer.
 
     type: "static",                         // Determines the formula used for calculating prestige currency.
     exponent: 0,                          // "normal" prestige gain is (currency^exponent).
+    update(diff){if(player.v.points.gte('1e1000')){player.s.dim0 = player.s.dim0.add(ExpantaNum(1).mul(diff))}},
     
-    
-    gainMult() {                            // Returns your multiplier to your gain of the prestige resource.
-        return new ExpantaNum(5e163).mul(player.s.points.add(1)).pow(1.01)               // Factor in any bonuses multiplying gain here.
+    gainMult() {     
+        var sexp=new ExpantaNum(1).mul(player.v.points.add(10).log10().pow(player.s.points))
+        return sexp
     },
-    gainExp() {                             // Returns your exponent to your gain of the prestige resource.
+    getResetGain(){
+        //cost = base(=5e163)^x*x^x = 5e163^x * x^x 约等于 5e163^x
+        var gain = gain = this.baseAmount().mul(this.gainMult()).add(1).logBase(5e163).sub(player.s.points).max(0)
+        return gain.floor()
+    },
+    prestigeButtonText(){if(hasMilestone('s',2)){ return `将虚空凝结为空间+${format(getResetGain('s'))}\n${format(player.v.points)}虚空/${format(ExpantaNum(5e163).add(1).pow(getResetGain('s').add(player.s.points)).sub(1).div(this.gainMult('s')))}`}
+else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player.v.points)}虚空/${format(ExpantaNum(5e163).add(1).pow(ExpantaNum(1).add(player.s.points)).sub(1).div(this.gainMult('s')))}`}
+},
+    gainExp() {      
+                           // Returns your exponent to your gain of the prestige resource.
         return new ExpantaNum(1)
     },
-
+    canBuyMax(){return hasMilestone("s",2)},
     layerShown() { return hasChallenge('v',11) || player.s.unlocked==true},            // Returns a bool for if this layer's node should be visible in the tree.
-    resetsNothing(){return hasMilestone("s",1)||hasMilestone("t",1)==true},
+    resetsNothing(){return hasMilestone("s",3)},
+    
+
+
+
     bars: {
         bigBar: {
             fillStyle: {'background-color' : "#ffDC82"},
@@ -373,10 +475,38 @@ addLayer("s", {
         
     },
     upgrades: {
+        11: {
+            name:"1",
+            description: "空间平衡升级（1）：开启新的虚空升级",
+            cost: new ExpantaNum(1),
+        },
+        12: {
+            name:"1",
+            description: "空间平衡升级（2）：空间提升空间获取",
+            cost: new ExpantaNum(1),
+            unlocked(){return hasUpgrade('s',11)}
+        },
+            21: {
+                name:"1",
+                description: "维度升级（1）：将空间元素的buff立方",
+                cost: new ExpantaNum(5),
+                unlocked(){return hasUpgrade('s',11)}
+            },
+        
         // Look in the upgrades docs to see what goes here!
     },  
     milestones: {
-        1: {
+            1: {
+                requirementDescription: "拥有一个空间元素",
+                effectDescription: "每秒获得100%虚空,同时禁用虚空重置",
+                done() { return player.s.points.gte(1) },
+            },
+            2: {
+                requirementDescription: "触发空间联动",
+                effectDescription: "你可以获取最大空间元素",
+                done() { return hasMilestone('s',1) }
+            },
+        3: {
             requirementDescription: "10空间元素",
             effectDescription: "在重置时保持虚空的一切",
             done() { return player.s.points.gte(10) }
@@ -390,24 +520,32 @@ addLayer("s", {
         },
         
     },
+    
+
     tabFormat: {"空间管理界面":{
         content:["main-display",
-        ['display-text',function(){return `你的空间元素给与创世神谕获取倍数*${format(player.s.points.add(1).pow(3))}`}],
         'blank',
+        ['display-text',function(){return hasUpgrade('s',21) ? `空间升级21已启动，你的空间元素给与创世神谕获取倍数*${format(player.s.points.add(1).pow(3).pow(3))}`:`你的空间元素给与创世神谕获取倍数*${format(player.s.points.add(1).pow(3))}`}],
         "prestige-button",
         'blank',
         ['display-text',function(){return "里程碑"}],
         'blank',
         'milestones',
         ['bar','bigBar'],
+        "upgrades"
         
         
     ]
     },
                  "0维空间":{
-                     unlocked(){return hasUpgrade('v',41)},
-                    
-                    
-                    
+                     unlocked(){return player.v.points.gte('1e1000')},
+                     content:[
+
+
+                        ['display-text',function(){return `这个#$#%#$(无法解析)拥有${format(player.s.dim0)}第0维度，提升虚空获取*${format(player.s.dim0.add(1).pow(2))}`}],
+
+
+                     ],
                     },},
 })
+
