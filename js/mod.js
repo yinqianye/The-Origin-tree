@@ -19,7 +19,7 @@ let VERSION = {
 let changelog = `<h1>Changelog:</h1><br>
 <h3>v0.1.1</h3><br>
 - 增加空间层，和第1维度.<br>
-- 数字大约为1e1740.<br>		
+- 数字大约为1e1900.<br>		
 
 <h3>v0.1.0</h3><br>
 		- 完成基础虚空层.<br>

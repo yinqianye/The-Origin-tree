@@ -24,6 +24,7 @@ addLayer("v", {
         var v= new ExpantaNum(1).mul(layers.v.buyables[13].effect2())        // Returns your multiplier to your gain of the prestige resource.
         if(hasUpgrade('v',24)){ v=v.mul(upgradeEffect('v',24)) }       
         if(hasChallenge('v',11)){v=v.mul(challengeEffect('v',11))}
+        if(hasUpgrade('s',13)){v=v.mul(upgradeEffect('s',13))}
         return v
         // Factor in any bonuses multiplying gain here.
     },
@@ -100,7 +101,7 @@ addLayer("v", {
             description: "升级23:根据虚空增强升级21",
             cost: new ExpantaNum(10000),
             effect() {
-                return player.v.points.add(10).pow(0.15)
+                return player.v.points.add(100000).pow(0.15)
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
             unlocked(){return hasUpgrade('v',22)},
@@ -301,6 +302,11 @@ update(diff){
             body() { return "传说在亘古之时，没有时间，没有空间，更没有现在的一切,\n后来，一位创世者从其他世界而来，同时对两个世界进行了单向连接\n于是，一种被称为创世神谕的神级能量出现了，虚空也被逐渐扩张,\n同时,扩张的虚空也增加了获取创世神谕的能力" },
             
         },
+        lore1: {
+            title: "一个设定补充",
+            body() { return "在一切之上，有一个力量一直在尝试调控各个世界的平衡，\n当一个世界发展过于强大之时，这股力量就会进行投影，以限制世界的发展\n根据力量的强度被分成两个种类\n分别是较弱小的软上限和极为强大的硬上限\n软上限只会减慢发展速度，而硬上限则会使得世界发展停滞" },
+            unlocked(){return player.v.points.gte(10000000)},
+        },
         
     },
     tabFormat: {"虚空核心架构所在":{
@@ -430,16 +436,16 @@ addLayer("t", {
 
     baseResource: "虚空",                 // The name of the resource your prestige gain is based on.
     baseAmount() { return player.v.points },  // A function to return the current amount of baseResource.
-    canBuyMax(){return hasMilestone('s',2)},
-    requires(){return new ExpantaNum(1)},              // The amount of the base needed to  gain 1 of the prestige currency.
-                                            // Also the amount required to unlock the layer.
+
+    requires(){return new ExpantaNum(1)},              // The amount of the base needed to  gain 1 of the prestige currency.                                      // Also the amount required to unlock the layer.
 
     type: "static",                         // Determines the formula used for calculating prestige currency.
     exponent: 0,                          // "normal" prestige gain is (currency^exponent).
     update(diff){if(player.v.points.gte('1e1000')){player.s.dim0 = player.s.dim0.add(ExpantaNum(1).mul(diff))}},
-    
+    getNextAt(canMax=false){return ExpantaNum(5e163)     },
     gainMult() {     
-        var sexp=new ExpantaNum(1).mul(player.v.points.add(10).log10().pow(player.s.points))
+        var sexp=new ExpantaNum(1)
+        if(hasUpgrade('s',12)){sexp = sexp.mul(player.v.points.add(10).logBase(10).pow(player.s.points))}
         return sexp
     },
     getResetGain(){
@@ -447,7 +453,7 @@ addLayer("t", {
         var gain = gain = this.baseAmount().mul(this.gainMult()).add(1).logBase(5e163).sub(player.s.points).max(0)
         return gain.floor()
     },
-    prestigeButtonText(){if(hasMilestone('s',2)){ return `将虚空凝结为空间+${format(getResetGain('s'))}\n${format(player.v.points)}虚空/${format(ExpantaNum(5e163).add(1).pow(getResetGain('s').add(player.s.points)).sub(1).div(this.gainMult('s')))}`}
+    prestigeButtonText(){if(hasMilestone('s',2)){ return `将虚空凝结为空间+${format(getResetGain('s'))}\n${format(player.v.points)}虚空/${format(ExpantaNum(5e163).add(1).pow(getResetGain('s').add(player.s.points).add(1)).sub(1).div(this.gainMult('s')))}`}
 else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player.v.points)}虚空/${format(ExpantaNum(5e163).add(1).pow(ExpantaNum(1).add(player.s.points)).sub(1).div(this.gainMult('s')))}`}
 },
     gainExp() {      
@@ -467,8 +473,8 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             direction: RIGHT,
             width: 200,
             height: 25,
-            progress() { return player.v.points.logBase(10).div(1000) },
-            display(){return `距离解锁第零维度(${format(player.v.points.logBase(10).div(10))})%`},
+            progress() { return player.v.points.add(1).logBase(10).div(1000) },
+            display(){return `距离解锁第零维度(${format(player.v.points.add(1).logBase(10).div(10))})%`},
             
             
         },
@@ -478,20 +484,32 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
         11: {
             name:"1",
             description: "空间平衡升级（1）：开启新的虚空升级",
-            cost: new ExpantaNum(1),
+            cost: new ExpantaNum(0),
+            unlocked(){return player.s.points.gte(1)},
         },
         12: {
             name:"1",
             description: "空间平衡升级（2）：空间提升空间获取",
-            cost: new ExpantaNum(1),
+            cost: new ExpantaNum(3),
             unlocked(){return hasUpgrade('s',11)}
         },
-            21: {
-                name:"1",
-                description: "维度升级（1）：将空间元素的buff立方",
-                cost: new ExpantaNum(5),
-                unlocked(){return hasUpgrade('s',11)}
+        13: {
+            name:"1",
+            description: "空间平衡升级（3）：基于空间和创世神谕给与虚空一个《微小》的加成",
+            cost: new ExpantaNum(5),
+            unlocked(){return hasUpgrade('s',11)},
+            effect() {
+                return player.v.points.add(1).logBase(1.004).pow(player.s.points.add(1).mul(2))
             },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
+        },
+        21: {
+            name:"1",
+            description: "维度升级（1）：将空间元素的buff立方",
+            cost: new ExpantaNum(5),
+            unlocked(){return hasUpgrade('s',11)}
+        },
+        
         
         // Look in the upgrades docs to see what goes here!
     },  
