@@ -12,13 +12,15 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.1.1",
+	num: "0.1.2",
 	name: "",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+<h3>v0.1.2</h3><br>
+- 增加两个升级和两个第0维度可重复购买项
 <h3>v0.1.1</h3><br>
-- 增加空间层，和第1维度.<br>
+- 增加空间层，和第0维度.<br>
 - 数字大约为1e1900.<br>		
 
 <h3>v0.1.0</h3><br>
