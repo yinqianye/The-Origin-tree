@@ -25,6 +25,8 @@ addLayer("v", {
         if(hasUpgrade('v',24)){ v=v.mul(upgradeEffect('v',24)) }       
         if(hasChallenge('v',11)){v=v.mul(challengeEffect('v',11))}
         if(hasUpgrade('s',13)){v=v.mul(upgradeEffect('s',13))}
+        if(player.s.dim0.gte(1)){v=v.mul(player.s.dim0.pow(2)) }
+        if(hasUpgrade('s',22)&&player.s.dim0.gte(1)){v=v.mul(player.s.dim0.pow(2))}
         return v
         // Factor in any bonuses multiplying gain here.
     },
@@ -364,16 +366,53 @@ addLayer("t", {
 
     layerShown() { return hasChallenge('v',11) || player.t.unlocked==true},      // Returns a bool for if this layer's node should be visible in the tree.
     resetsNothing(){return hasMilestone("s",1)||hasMilestone("t",1)==true},
-
+    update(diff){if(player.v.points.gte('1e1000')){player.t.points = player.t.points.add(ExpantaNum(1).mul(diff))}},
     upgrades: {
         // Look in the upgrades docs to see what goes here!
     },
     milestones: {
         1: {
-            requirementDescription: "10时间节点",
-            effectDescription: "在重置时保持虚空的一切",
-            done() { return player.t.points.gte(10) }
+            requirementDescription: "60时间",
+            effectDescription: "您玩了1分钟",
+            done() { return player.t.points.gte(60) }
         },
+        2: {
+            requirementDescription: "3600时间",
+            effectDescription: "您玩了1小时",
+            done() { return player.t.points.gte(3600) }
+        },
+        3: {
+            requirementDescription: "86400时间",
+            effectDescription: "您玩了1天",
+            done() { return player.t.points.gte(86400) }
+        },
+        4: {
+            requirementDescription: "31536000时间",
+            effectDescription: "您玩了1年",
+            done() { return player.t.points.gte(31536000) }
+        },
+        5: {
+            requirementDescription: "3153600000时间",
+            effectDescription: "您玩了1世纪",
+            done() { return player.t.points.gte(3153600000) }
+        },
+        6: {
+            requirementDescription: "7.884e15时间",
+            effectDescription: "您玩了1银河年",
+            done() { return player.t.points.gte(7.884e15) }
+        },
+        9: {
+            requirementDescription: "3.1536e47时间",
+            effectDescription: "您玩了1黑洞纪元",
+            done() { return player.t.points.gte(3.1536e47) }
+        },
+        10: {
+            requirementDescription: "1.79e308时间",
+            effectDescription: "您玩了1无限时间",
+            done() { return player.t.points.gte('1.79e308') }
+        },
+
+
     },
     infoboxes: {
         lore: {
@@ -441,8 +480,15 @@ addLayer("t", {
 
     type: "static",                         // Determines the formula used for calculating prestige currency.
     exponent: 0,                          // "normal" prestige gain is (currency^exponent).
-    update(diff){if(player.v.points.gte('1e1000')){player.s.dim0 = player.s.dim0.add(ExpantaNum(1).mul(diff))}},
-    getNextAt(canMax=false){return ExpantaNum(5e163)     },
+
+    update(diff){if(player.v.points.gte('1e1000')){
+var dim0=ExpantaNum(1)
+if(hasUpgrade('s',23)){dim0=dim0.mul(upgradeEffect('s',23))}
+player.s.dim0 = player.s.dim0.add(ExpantaNum(1).mul(diff).mul(buyableEffect("s",11).pow(ExpantaNum(1).add(buyableEffect("s",12))).mul(dim0)))
+
+}},
+    
+    getNextAt(canMax=false){return ExpantaNum(5e163)},
     gainMult() {     
         var sexp=new ExpantaNum(1)
         if(hasUpgrade('s',12)){sexp = sexp.mul(player.v.points.add(10).logBase(10).pow(player.s.points))}
@@ -476,7 +522,17 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             progress() { return player.v.points.add(1).logBase(10).div(1000) },
             display(){return `距离解锁第零维度(${format(player.v.points.add(1).logBase(10).div(10))})%`},
             
+            unlocked(){return player.s.points.gte(1)&&!player.s.dim0.gte(1)}
+        },
+        bigBar1: {
+            fillStyle: {'background-color' : "#ffDC82"},
+            direction: RIGHT,
+            width: 200,
+            height: 25,
+            progress() { return player.s.dim0.add(1).logBase(1e10).div(1000) },
+            display(){return `距离解锁第一维度(${format(player.s.dim0.add(1).logBase(1e10).div(10))})%`},
             
+            unlocked(){return player.s.dim0.gte(1)&&!player.s.dim1.gte(1)}
         },
         
     },
@@ -499,7 +555,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             cost: new ExpantaNum(5),
             unlocked(){return hasUpgrade('s',11)},
             effect() {
-                return player.v.points.add(1).logBase(1.004).pow(player.s.points.add(1).mul(2))
+                return player.v.points.add(10000000000).logBase(1.004).pow(player.s.points.add(1).mul(2)).add(1)
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
         },
@@ -508,6 +564,28 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             description: "维度升级（1）：将空间元素的buff立方",
             cost: new ExpantaNum(5),
             unlocked(){return hasUpgrade('s',11)}
+        },
+        22: {
+            name:"1",
+            description: "维度升级（2）：将第0维度的buff立方",
+            cost: new ExpantaNum(10000),
+            currencyDisplayName:"第零维度",
+            pay(){player.s.dim0 = player.s.dim0.sub(10000)},
+            canAfford(){return player.s.dim0.gte(10000)},
+            unlocked(){return player.s.dim0.gte(1)},
+        },
+        23: {
+            name:"1",
+            description: "维度升级（3）：基于虚空和空间增强第零维度的创造",
+            cost: new ExpantaNum(1e5),
+            currencyDisplayName:"第零维度",
+            pay(){player.s.dim0 = player.s.dim0.sub(1e5)},
+            canAfford(){return player.s.dim0.gte(1e5)},
+            unlocked(){return hasUpgrade('s',22)},
+            effect() {
+                return player.v.points.logBase(10).pow(player.s.points.div(2))
+            },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
         },
         
         
@@ -538,7 +616,46 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
         },
         
     },
-    
+    buyables: {
+        11: {
+            cost(x){ 
+                var dim011cost=new ExpantaNum(5)
+                dim011cost = dim011cost.pow(getBuyableAmount('s',11))
+                if(getBuyableAmount('s',11).gte(200)){dim011cost = dim011cost.pow(1.5)}
+                return dim011cost
+            },
+            canAfford() { return player[this.layer].dim0.gte(this.cost(getBuyableAmount(this.layer, this.id))) },  
+            display() { return `第0维度增幅器<br />价格:${format(this.cost(player.s.buyables[11]))}\n已购买:${format(getBuyableAmount('s',11))}\n效果:维度生产*${format(buyableEffect("s",11))}` },
+            
+            unlocked(){return player.s.dim0.gte(1)}, 
+            effect() {
+                return ExpantaNum(2).pow(getBuyableAmount('s',11))
+            },
+            buy() {
+                player[this.layer].dim0 = player[this.layer].dim0.sub(this.cost(getBuyableAmount(this.layer, this.id)))
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+        },
+        12: {
+            cost(x){ 
+                var dim011cost=new ExpantaNum(1e4)
+                dim011cost = dim011cost.pow(getBuyableAmount('s',12).mul(buyableEffect("s",12).add(1)))
+                return dim011cost
+            },
+            canAfford(){return player.s.dim0.gte(ExpantaNum(1e4).pow(getBuyableAmount('s',12).mul(buyableEffect("s",12).add(1))))},   
+            display() { return `第0维度稳定器(最大10个)<br />价格:${format(this.cost(player.s.buyables[12]))}\n已购买:${format(getBuyableAmount('s',12))}\n效果:维度生产指数+${format(buyableEffect("s",12))}` },
+            
+            unlocked(){return player.s.dim0.gte(1)}, 
+            effect() {
+                return ExpantaNum(0.2).mul(getBuyableAmount('s',12))
+            },
+            buy() {
+                player[this.layer].dim0 = player[this.layer].dim0.sub(this.cost(getBuyableAmount(this.layer, this.id)))
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            purchaseLimit(){return ExpantaNum(10)}
+        },
+        },
 
     tabFormat: {"空间管理界面":{
         content:["main-display",
@@ -559,11 +676,22 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
                      unlocked(){return player.v.points.gte('1e1000')},
                      content:[
 
-
-                        ['display-text',function(){return `这个#$#%#$(无法解析)拥有${format(player.s.dim0)}第0维度，提升虚空获取*${format(player.s.dim0.add(1).pow(2))}`}],
-
+                        ['display-text',function(){return "到达1e10000第零维度以解锁第一维度"}],
+                        'blank',
+                        ['display-text',function(){return `这个#$#%#$(无法解析)拥有${format(player.s.dim0)}第0维度，提升虚空获取*${format(player.s.dim0.add(1).pow(2))}`}],['display-text',function(){return hasUpgrade('s',22) ? `因为空间升级22，第0维度buff以平方,目前为*${format(player.s.dim0.add(1).pow(2).pow(2))}`:``}],
+                        'blank',
+                        ['bar','bigBar1'],
+                        
 
                      ],
-                    },},
+                    },
+                    "维度购买项":{
+                        unlocked(){return player.s.dim0.gte('1')},      
+                        content:[
+                            'buyables'
+    
+                         ],          
+                },
+            }
 })
 
