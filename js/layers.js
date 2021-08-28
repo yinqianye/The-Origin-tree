@@ -83,11 +83,12 @@ addLayer("v", {
             description: "升级21:根据创世神谕增强神谕产生",
             cost: new ExpantaNum(256),
             effect() {
-               var effectv21 = player.points.add(10).mul(upgradeEffect('v',23)).pow(0.3)
-                if(hasUpgrade('v',52)){ effectv21= effectv21.mul(upgradeEffect('v',51).root(10))
+               var effectv21 = player.points.add(10).pow(0.3)
+               if(hasUpgrade('v',23)){effectv21=effectv21.mul(upgradeEffect('v',23))}
+                if(hasUpgrade('v',52)){ effectv21= effectv21.mul(upgradeEffect('v',51).root(10))}
                 if(upgradeEffect('v',21).gte('1e2500')){effectv21=effectv21.pow(0.1)}
                 return effectv21 
-                }
+            
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
             unlocked(){return hasUpgrade('v',17)},
@@ -97,7 +98,7 @@ addLayer("v", {
             cost: new ExpantaNum(512),
             effect() {
                 var effectv22 =  player.v.points.add(10).pow(0.5)
-                if(upgradeEffect('v',22).gte('1e2000')){effectv22 = effectv22.pow(0.1)}
+                if(upgradeEffect('v',22).gte('1e2000')){effectv22 = effectv22.pow(0.2)}
                 return effectv22
 
             },
