@@ -453,7 +453,7 @@ addLayer("t", {
 
 
 
-    
+    var dim0
 
 
     addLayer("s", {
@@ -482,10 +482,14 @@ addLayer("t", {
     exponent: 0,                          // "normal" prestige gain is (currency^exponent).
 
     update(diff){if(player.v.points.gte('1e1000')){
-var dim0=ExpantaNum(1)
-if(hasUpgrade('s',23)){dim0=dim0.mul(upgradeEffect('s',23))}
-player.s.dim0 = player.s.dim0.add(ExpantaNum(1).mul(diff).mul(buyableEffect("s",11).pow(ExpantaNum(1).add(buyableEffect("s",12))).mul(dim0)))
+        
 
+dim0 = ExpantaNum(1).mul(diff).mul(buyableEffect("s",11).pow(ExpantaNum(1).add(buyableEffect("s",12))))
+if(hasUpgrade('s',23)){dim0=dim0.mul(upgradeEffect('s',23))}
+player.s.dim0 = player.s.dim0.add(dim0)
+
+
+dim0 = dim0.div(diff)//帧率还原为秒
 }},
     
     getNextAt(canMax=false){return ExpantaNum(5e163)},
@@ -567,7 +571,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
         },
         22: {
             name:"1",
-            description: "维度升级（2）：将第0维度的buff立方",
+            description: "维度升级（2）：将第0维度的buff平方",
             cost: new ExpantaNum(10000),
             currencyDisplayName:"第零维度",
             pay(){player.s.dim0 = player.s.dim0.sub(10000)},
@@ -577,6 +581,19 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
         23: {
             name:"1",
             description: "维度升级（3）：基于虚空和空间增强第零维度的创造",
+            cost: new ExpantaNum(1e5),
+            currencyDisplayName:"第零维度",
+            pay(){player.s.dim0 = player.s.dim0.sub(1e5)},
+            canAfford(){return player.s.dim0.gte(1e5)},
+            unlocked(){return hasUpgrade('s',22)},
+            effect() {
+                return player.v.points.add(100).logBase(10).pow(player.s.points.div(2))
+            },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
+        },
+        24: {
+            name:"1",
+            description: "维度升级（4）：第0维度基于自身获得一点倍数",
             cost: new ExpantaNum(1e5),
             currencyDisplayName:"第零维度",
             pay(){player.s.dim0 = player.s.dim0.sub(1e5)},
@@ -621,7 +638,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             cost(x){ 
                 var dim011cost=new ExpantaNum(5)
                 dim011cost = dim011cost.pow(getBuyableAmount('s',11))
-                if(getBuyableAmount('s',11).gte(200)){dim011cost = dim011cost.pow(1.5)}
+                if(getBuyableAmount('s',11).gte(200)){dim011cost = dim011cost.pow(3)}
                 return dim011cost
             },
             canAfford() { return player[this.layer].dim0.gte(this.cost(getBuyableAmount(this.layer, this.id))) },  
@@ -629,7 +646,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             
             unlocked(){return player.s.dim0.gte(1)}, 
             effect() {
-                return ExpantaNum(2).pow(getBuyableAmount('s',11))
+                return ExpantaNum(2.6).pow(getBuyableAmount('s',11))
             },
             buy() {
                 player[this.layer].dim0 = player[this.layer].dim0.sub(this.cost(getBuyableAmount(this.layer, this.id)))
@@ -656,7 +673,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             purchaseLimit(){return ExpantaNum(10)}
         },
         },
-
+      
     tabFormat: {"空间管理界面":{
         content:["main-display",
         'blank',
@@ -667,8 +684,8 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
         'blank',
         'milestones',
         ['bar','bigBar'],
-        "upgrades"
-        
+        ['row',[['upgrade',11],['upgrade',12],['upgrade',13]]], 
+        ['row',[['upgrade',21],['upgrade',22],['upgrade',23],['upgrade',24]]]
         
     ]
     },
@@ -680,6 +697,8 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
                         'blank',
                         ['display-text',function(){return `这个#$#%#$(无法解析)拥有${format(player.s.dim0)}第0维度，提升虚空获取*${format(player.s.dim0.add(1).pow(2))}`}],['display-text',function(){return hasUpgrade('s',22) ? `因为空间升级22，第0维度buff以平方,目前为*${format(player.s.dim0.add(1).pow(2).pow(2))}`:``}],
                         'blank',
+                        
+                        ['display-text',function(){return `每秒有${format(dim0)}个0维空间被创造`}],
                         ['bar','bigBar1'],
                         
 
