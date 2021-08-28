@@ -82,10 +82,12 @@ addLayer("v", {
             name:"1",
             description: "升级21:根据创世神谕增强神谕产生",
             cost: new ExpantaNum(256),
-            effect() {if(hasUpgrade('v',52)){
-            
-                return player.points.add(10).mul(upgradeEffect('v',23)).pow(0.3).mul(upgradeEffect('v',51).root(10))
-            }else{return player.points.add(10).mul(upgradeEffect('v',23)).pow(0.3)}
+            effect() {
+               var effectv21 = player.points.add(10).mul(upgradeEffect('v',23)).pow(0.3)
+                if(hasUpgrade('v',52)){ effectv21= effectv21.mul(upgradeEffect('v',51).root(10))
+                if(upgradeEffect('v',21).gte('1e2500')){effectv21=effectv21.pow(0.1)}
+                return effectv21 
+                }
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
             unlocked(){return hasUpgrade('v',17)},
@@ -94,7 +96,10 @@ addLayer("v", {
             description: "升级22:根据虚空增强神谕产生",
             cost: new ExpantaNum(512),
             effect() {
-                return player.v.points.add(10).pow(0.5)
+                var effectv22 =  player.v.points.add(10).pow(0.5)
+                if(upgradeEffect('v',22).gte('1e2000')){effectv22 = effectv22.pow(0.1)}
+                return effectv22
+
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
             unlocked(){return hasUpgrade('v',21)},
@@ -366,7 +371,7 @@ addLayer("t", {
 
     layerShown() { return hasChallenge('v',11) || player.t.unlocked==true},      // Returns a bool for if this layer's node should be visible in the tree.
     resetsNothing(){return hasMilestone("s",1)||hasMilestone("t",1)==true},
-    update(diff){if(player.v.points.gte('1e1000')){player.t.points = player.t.points.add(ExpantaNum(1).mul(diff))}},
+    update(diff){player.t.points = player.t.points.add(ExpantaNum(1).mul(diff))},
     upgrades: {
         // Look in the upgrades docs to see what goes here!
     },
@@ -486,6 +491,7 @@ addLayer("t", {
 
 dim0 = ExpantaNum(1).mul(diff).mul(buyableEffect("s",11).pow(ExpantaNum(1).add(buyableEffect("s",12))))
 if(hasUpgrade('s',23)){dim0=dim0.mul(upgradeEffect('s',23))}
+if(hasUpgrade('s',24)){dim0=dim0.mul(upgradeEffect('s',24))}
 player.s.dim0 = player.s.dim0.add(dim0)
 
 
@@ -600,7 +606,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             canAfford(){return player.s.dim0.gte(1e5)},
             unlocked(){return hasUpgrade('s',22)},
             effect() {
-                return player.v.points.logBase(10).pow(player.s.points.div(2))
+                return player.s.dim0.logBase(2).pow(5).pow(player.s.dim0.logBase(player.s.dim0.logBase(2).pow(18)))
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }, // Add formatting to the effect
         },
@@ -638,7 +644,8 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             cost(x){ 
                 var dim011cost=new ExpantaNum(5)
                 dim011cost = dim011cost.pow(getBuyableAmount('s',11))
-                if(getBuyableAmount('s',11).gte(200)){dim011cost = dim011cost.pow(3)}
+                if(getBuyableAmount('s',11).gte(200)){dim011cost = dim011cost.pow(2.5)}
+                if(getBuyableAmount('s',11).gte(1000)){dim011cost = dim011cost.pow(2.5)}
                 return dim011cost
             },
             canAfford() { return player[this.layer].dim0.gte(this.cost(getBuyableAmount(this.layer, this.id))) },  
@@ -685,7 +692,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
         'milestones',
         ['bar','bigBar'],
         ['row',[['upgrade',11],['upgrade',12],['upgrade',13]]], 
-        ['row',[['upgrade',21],['upgrade',22],['upgrade',23],['upgrade',24]]]
+        ['row',[['upgrade',21],['upgrade',22],['upgrade',23]]]
         
     ]
     },
@@ -700,7 +707,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
                         
                         ['display-text',function(){return `每秒有${format(dim0)}个0维空间被创造`}],
                         ['bar','bigBar1'],
-                        
+                        ['row',[['upgrade',24]]]
 
                      ],
                     },
