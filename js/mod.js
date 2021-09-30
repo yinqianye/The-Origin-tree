@@ -12,13 +12,19 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.1.2",
+	num: "0.1.4",
 	name: "",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+<h3>v0.1.4</h3><br>
+- 调整一些数值（所以请忽略v0.1.3的数字），插入一个升级，增加4个挑战，数字大概为1e17174或1e17250（等待反馈ing）
+<br><br>
+<h3>v0.1.3</h3><br>
+- 增加3个升级，数字大概为1ee12800
+<br><br>
 <h3>v0.1.2</h3><br>
-- 增加两个升级和两个第0维度可重复购买项
+- 增加两个升级和两个第0维度可重复购买项<br>
 <h3>v0.1.1</h3><br>
 - 增加空间层，和第0维度.<br>
 - 数字大约为1e1900.<br>		
@@ -76,6 +82,10 @@ if(hasUpgrade('s',21)){
 //下面是挑战专用
 //虚空挑战11debuff
 if(inChallenge("v",11)) gain = gain.pow(0.1)
+if(inChallenge("s",11)||inChallenge("s",14)) gain = gain.log(10)
+//if(inChallenge("s",12)||inChallenge("s",14)) gain = gain.log(10)   s挑战12的debuff在虚空获取处
+if(inChallenge("s",13)||inChallenge("s",14)) gain = gain.div(player.v.points)
+
 //
 
 	
