@@ -48,7 +48,7 @@ addLayer("v", {
     upgrades: {
             11: {
                 name:"1",
-                description: "升级11-该行每个升级都会使点数增长x2.",
+                description: "升级11-该行每个升级都会使神谕获取增长x2.",
                 cost: new ExpantaNum(1),
         },
             12: {
@@ -179,7 +179,7 @@ addLayer("v", {
         },
         51: {
             name:"1",
-            description: "恭喜创造空间，点数获取获得一个基于空间元素*100的对数的指数增幅",
+            description: "恭喜创造空间，神谕获取获得一个基于空间元素*100的对数的指数增幅",
             cost: new ExpantaNum(1e167),
             unlocked(){return hasUpgrade('s',11)},
             effect() {
@@ -324,6 +324,7 @@ update(diff){
     tabFormat: {"虚空核心架构所在":{
         content:[
             ['infobox','lore'],
+            ['infobox','lore1'],
             "main-display",
             ['display-text',function(){return `您每秒获得${format(getResetGain(this. layer))}虚空体积(需要空间层的第一个里程碑)`}],
         'blank',
@@ -505,7 +506,8 @@ if(hasChallenge('s',11)){dim0=dim0.mul(challengeEffect('s',11))}
 if(hasChallenge('s',13)){dim0=dim0.mul(challengeEffect('s',13))}
 if(hasChallenge('s',14)){dim0=dim0.mul('1e1024')}
 player.s.dim0 = player.s.dim0.add(dim0)
-
+//自动空间元素获取
+if(hasUpgrade('s',34)){player.s.points = player.s.points.add(getResetGain('s'))}
 
 
 dim0 = dim0.div(diff)//帧率还原为秒
@@ -591,19 +593,19 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
         22: {
             name:"1",
             description: "维度升级（2）：将第0维度的buff平方",
-            cost: new ExpantaNum(10000),
+            cost: new ExpantaNum(1000),
             currencyDisplayName:"第零维度",
-            pay(){player.s.dim0 = player.s.dim0.sub(10000)},
-            canAfford(){return player.s.dim0.gte(10000)},
+            pay(){player.s.dim0 = player.s.dim0.sub(1000.0)},
+            canAfford(){return player.s.dim0.gte(1000)},
             unlocked(){return player.s.dim0.gte(1)},
         },
         23: {
             name:"1",
             description: "维度升级（2.5）：将维度获取*空间",
-            cost: new ExpantaNum(10000),
+            cost: new ExpantaNum(5000),
             currencyDisplayName:"第零维度",
-            pay(){player.s.dim0 = player.s.dim0.sub(10000)},
-            canAfford(){return player.s.dim0.gte(10000)},
+            pay(){player.s.dim0 = player.s.dim0.sub(5000)},
+            canAfford(){return player.s.dim0.gte(5000)},
             unlocked(){return hasUpgrade('s',22)},
         },
         24: {
@@ -670,6 +672,46 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             unlocked(){return hasUpgrade('s',27)},
 
         },
+        32: {
+            name:"1",
+            description: "维度升级（7）你打破了壁障，最先获得的就是速度的提升，你的第0维度每^100则第0维度增幅器的上限+1",
+            cost: new ExpantaNum('0'),
+            currencyDisplayName:"第零维度",
+            pay(){player.s.dim0 = player.s.dim0.sub('0')},
+            canAfford(){return player.s.dim0.gte('0')},
+            effect() {
+                if(hasUpgrade("s",32)){return player.s.dim0.add(1).logBase(10).div(100).floor()}
+                else{return new ExpantaNum(0)}
+            },
+            unlocked(){return hasChallenge('s',14)},
+
+        },
+        33: {
+            name:"1",
+            description: "解锁升级（1）:解锁收藏层，解锁神器：屏障碎裂",
+            cost: new ExpantaNum('2e4400'),
+            currencyDisplayName:"第零维度",
+            pay(){player.s.dim0 = player.s.dim0.sub('2e4400')},
+            canAfford(){return player.s.dim0.gte('2e4400')},
+            effect() {
+                
+            },
+            unlocked(){return hasUpgrade('s',32)},
+
+        },
+        34: {
+            name:"1",
+            description: "空间进化（1）:自动购买空间元素",
+            cost: new ExpantaNum('6e6969'),
+            currencyDisplayName:"第零维度",
+            pay(){player.s.dim0 = player.s.dim0.sub('6e6969')},
+            canAfford(){return player.s.dim0.gte('6e6969')},
+            effect() {
+                
+            },
+            unlocked(){return hasUpgrade('s',32)},
+
+        },
         
         
         // Look in the upgrades docs to see what goes here!
@@ -708,7 +750,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             },
             
             canAfford() { return player[this.layer].dim0.gte(this.cost(getBuyableAmount(this.layer, this.id))) },  
-            display() { return `第0维度增幅器(最大256个)<br />价格:${format(this.cost(player.s.buyables[11]))}\n已购买:${format(getBuyableAmount('s',11))}\n效果:维度生产*${format(buyableEffect("s",11))}` },
+            display() { return `第0维度增幅器(最大${format(new ExpantaNum(256).add(upgradeEffect("s",32)))}个)<br />价格:${format(this.cost(player.s.buyables[11]))}\n已购买:${format(getBuyableAmount('s',11))}\n效果:维度生产*${format(buyableEffect("s",11))}` },
             
             unlocked(){return player.s.dim0.gte(1)}, 
             effect() {
@@ -716,14 +758,16 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
             },
             
             buy() {
-                if(hasUpgrade("s",31)&&getBuyableAmount('s',11).lt(256)){this.buyMax();return}
+                if(hasUpgrade("s",31)&&getBuyableAmount('s',11)){this.buyMax();return}
                 player[this.layer].dim0 = player[this.layer].dim0.sub(this.cost(getBuyableAmount(this.layer, this.id)))
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             buyMax(){
-                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(ExpantaNum(256).sub(getBuyableAmount('s',11))))
+                if(!hasUpgrade("s",32)){setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(ExpantaNum(256).sub(getBuyableAmount('s',11))))}
+                if(hasUpgrade("s",32)){setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(ExpantaNum(256).add(upgradeEffect("s",32)).sub(getBuyableAmount('s',11))))}
+            
             },
-            purchaseLimit(){return ExpantaNum(256)}
+            purchaseLimit(){return ExpantaNum(256).add(upgradeEffect("s",32))}
         },
         12: {
             cost(x){ 
@@ -732,7 +776,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
                 return dim011cost
             },
             canAfford(){return player.s.dim0.gte(ExpantaNum(1e4).pow(getBuyableAmount('s',12).mul(buyableEffect("s",12).add(1))))},   
-            display() { return `第0维度稳定器(最大10个)<br />价格:${format(this.cost(player.s.buyables[12]))}\n已购买:${format(getBuyableAmount('s',12))}\n效果:维度生产指数+${format(buyableEffect("s",12))}` },
+            display() { return `第0维度稳定器(最大10个)<br />价格:${format(this.cost(player.s.buyables[12]))}\n已购买:${format(getBuyableAmount('s',12))}\n效果:维度生产指数+${format(buyableEffect("s",12))}\n注：长按可购买可以连续购买(在任何树生效)` },
             
             unlocked(){return player.s.dim0.gte(1)}, 
             effect() {
@@ -781,7 +825,11 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
                 goalDescription(){return "???创世神谕"},
                 rewardDisplay(){return `将第0维度的获取基于你在这个挑战中获得的最大创世神谕获得buff,目前*${format(challengeEffect('s',13))}`},
                 rewardEffect() {
+                    if(player.co.god1besttime.gte(1)){
+                        challs13best = challs13best.mul(player.co.points.pow(player.co.points))
+                    }
                     return challs13best.root(10)
+
                 },
                 unlocked(){return hasChallenge("s",12)},
                 onEnter(){player.points = ExpantaNum(1)
@@ -818,7 +866,7 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
         'blank',
         'milestones',
         ['bar','bigBar'],
-        ['row',[['upgrade',11],['upgrade',12],['upgrade',13]]], 
+        ['row',[['upgrade',11],['upgrade',12],['upgrade',13],['upgrade',34]]], 
         ['row',[['upgrade',21],['upgrade',22],['upgrade',24]]],
         "challenges",
     ]
@@ -834,8 +882,9 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
                         
                         ['display-text',function(){return `每秒有${format(dim0)}个0维空间被创造`}],
                         ['bar','bigBar1'],
-                        ['row',[['upgrade',23],['upgrade',25],['upgrade',26],['upgrade',31]]],
-                        ['row',[['upgrade',27]]]
+                        ['row',[['upgrade',23],['upgrade',25],['upgrade',26],['upgrade',31],['upgrade',32]]],
+                        ['row',[['upgrade',27]]],
+                        ['row',[['upgrade',33]]]
 
                      ],
                     },
@@ -846,6 +895,84 @@ else{ return `将虚空凝结为空间+${format(ExpantaNum(1))}\n${format(player
     
                          ],          
                 },
+            }
+})
+addLayer("co", {
+    startData() { return {                  // startData is a function that returns default data for a layer. 
+        unlocked: true,                     // You can add more variables here to add them to your layer.
+        points: new ExpantaNum(0),
+        god1: new ExpantaNum(0),
+        god1time: new ExpantaNum(0),     
+        god1besttime : new ExpantaNum(0),      // "points" is the internal name for the main resource of the layer.
+    }},
+update(diff){
+    //这里是计算收藏能量的部分
+    player.co.points = player.co.god1besttime.div(2)
+    //这个是神器1部分
+    if(player.points.lt(1)){
+        player.co.god1 = new ExpantaNum(0)
+        if(player.co.god1time.gte(player.co.god1besttime)){player.co.god1besttime = player.co.god1time}
+        player.co.god1time = new ExpantaNum(0)
+       
+    }
+    if(player.co.god1.eq(1)&&player.points.gte(1)){player.co.god1time = player.co.god1time.add(diff)}
+    if(player.co.god1.eq(1)&&player.points.gte(1)){player.points = player.points.div(new ExpantaNum(10).pow(player.co.god1time))}
+    if(player.co.god1.eq(1)&&player.points.gte(1)&&player.co.god1time.gte(10)){player.points = player.points.pow(new ExpantaNum(1).div(player.co.god1time))}
+    if(player.co.god1.eq(1)&&player.points.gte(1)&&player.co.god1time.gte(100)&&player.points.gte("1e1000")){player.points = player.points.logBase(2)}
+},
+    color: "#FFFF00",                       // The color for this layer, which affects many elements.
+    resource: "收藏能量",            // The name of this layer's main prestige resource.
+    row: "side",                                 // The row this layer is on (0 is the first row).
+
+    baseResource: "points",                 // The name of the resource your prestige gain is based on.
+    baseAmount() { return player.points },  // A function to return the current amount of baseResource.
+
+    requires: new ExpantaNum(10),              // The amount of the base needed to  gain 1 of the prestige currency.
+                                            // Also the amount required to unlock the layer.
+
+    type: "none",                         // Determines the formula used for calculating prestige currency.
+    exponent: 0.5,                          // "normal" prestige gain is (currency^exponent).
+
+    gainMult() {                            // Returns your multiplier to your gain of the prestige resource.
+        return new ExpantaNum(1)               // Factor in any bonuses multiplying gain here.
+    },
+    gainExp() {                             // Returns the exponent to your gain of the prestige resource.
+        return new ExpantaNum(1)    
+    },
+
+    layerShown() { return hasUpgrade("s",33) },          // Returns a bool for if this layer's node should be visible in the tree.
+
+    upgrades: {
+        // Look in the upgrades docs to see what goes here!
+    },
+    clickables: {
+        11: {
+            display() {return player.co.god1.eq(0)?"点击启用神器1\n当前状态：未开启":"点击启用神器1\n当前状态：以开启"},
+            canClick(){return true},
+            onClick(){
+                if(player.co.god1.eq(0)){player.co.god1 = new ExpantaNum(1)}
+                else if(player.co.god1.eq(1)){
+                    player.co.god1 = new ExpantaNum(0)
+                    if(player.co.god1time.gte(player.co.god1besttime)){player.co.god1besttime = player.co.god1time}
+                    player.co.god1time = new ExpantaNum(0)
+                }
+            },
+        }
+        
+    },
+    tabFormat: {"藏品库":{
+        content:["main-display",
+        ["text-input", "thingy"],
+        ['display-text',function(){return hasUpgrade("s",33)?`神器1：屏障碎裂者`:``},
+        {"color": "write", "font-size": "32px", "font-family": "Comic Sans MS"}],
+        ['display-text',function(){return hasUpgrade("s",33)?`开启效果：你的创世神谕会因为屏障的破碎受到冲击而每秒/(10^开启时间)，同时不再获得创世神谕，神谕数量小于1自动退出，基于你开启的最大时间提升飞升屏障挑战3的buff，若10秒内没有退出，则每秒^（1/10秒后的时间）,若100秒内没有归零则每秒log2`:``}],
+        ['display-text',function(){return hasUpgrade("s",33)?`当前神器最大开启时间每2秒增加1收藏能量`:``}],
+        ['display-text',function(){return hasUpgrade("s",33)?`当前神器开启时间：${format(player.co.god1time)}`:``}],
+        ['display-text',function(){return hasUpgrade("s",33)?`当前神器开启最大时间：${format(player.co.god1besttime)}`:``}],
+        ['row',[['clickable',11]]]
+       
+    ]
+    },
             }
 })
 

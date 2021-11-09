@@ -17,6 +17,9 @@ let VERSION = {
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+<h3>v0.1.5</h3><br>
+- 使用了本树第一个clickable，增加收藏层，增加几个升级，数值大约在1e75000
+<br><br>
 <h3>v0.1.4</h3><br>
 - 调整一些数值（所以请忽略v0.1.3的数字），插入一个升级，增加4个挑战，数字大概为1e17174或1e17250（等待反馈ing）
 <br><br>
@@ -51,7 +54,11 @@ function canGenPoints(){
 // Calculate points/sec!
 function getPointGen() {
 	if(!canGenPoints()) return new ExpantaNum(0)
+	
 	let gain = new ExpantaNum(1)
+	//点数基础增益》》最高优先级
+    
+	//剩下的
 	var tvu = 0
 for(i=11;i<=17;i++){
 if (hasUpgrade('v', i)) tvu+=1
@@ -85,10 +92,12 @@ if(inChallenge("v",11)) gain = gain.pow(0.1)
 if(inChallenge("s",11)||inChallenge("s",14)) gain = gain.log(10)
 //if(inChallenge("s",12)||inChallenge("s",14)) gain = gain.log(10)   s挑战12的debuff在虚空获取处
 if(inChallenge("s",13)||inChallenge("s",14)) gain = gain.div(player.v.points)
+//创世神谕软上限
+if(player.points.gte('1ee5')) gain = gain.pow(0.01).mul('1ee5')
+//获取强制数值
 
-//
+if(player.co.god1.eq(1)) gain = new ExpantaNum(0)
 
-	
 	
 	return gain
 }
